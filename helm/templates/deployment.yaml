@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "audio-pipeline-chart.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "audio-pipeline-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "audio-pipeline-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "audio-pipeline-chart.selectorLabels" . | nindent 8 }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: websocket-server
+        image: "{{ .Values.websocketServer.image.repository }}:{{ .Values.websocketServer.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.websocketServer.image.pullPolicy }}
+        ports:
+        - name: websocket
+          containerPort: {{ .Values.websocketServer.port }}
+          protocol: TCP
+        env:
+        - name: LLM_API_BASE
+          value: {{ .Values.websocketServer.env.llmApiBase | quote }}
+        - name: OPENAI_API_KEY
+          value: {{ .Values.websocketServer.env.openaiApiKey | quote }}
+        - name: LLM_MODEL_NAME
+          value: {{ .Values.websocketServer.env.llmModelName | quote }}
+        - name: ASR_SERVER_ADDRESS
+          value: {{ .Values.websocketServer.env.asrServerAddress | quote }}
+        - name: TTS_SERVER_ADDRESS
+          value: {{ .Values.websocketServer.env.ttsServerAddress | quote }}
+        - name: TTS_SAMPLE_RATE_HZ
+          value: {{ .Values.ttsSampleRateHz | quote }}
+        resources:
+          {{- toYaml .Values.websocketServer.resources | nindent 10 }}
+
+      - name: gradio-ui
+        image: "{{ .Values.gradioUi.image.repository }}:{{ .Values.gradioUi.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.gradioUi.image.pullPolicy }}
+        ports:
+        - name: http-ui
+          containerPort: {{ .Values.gradioUi.port }}
+          protocol: TCP
+        env:
+        - name: WEBSOCKET_URI
+          value: {{ .Values.gradioUi.env.websocketUri | quote }}
+        - name: TTS_SAMPLE_RATE_HZ
+          value: {{ .Values.ttsSampleRateHz | quote }}
+        resources:
+          {{- toYaml .Values.gradioUi.resources | nindent 10 }}

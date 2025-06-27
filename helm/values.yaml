@@ -1,0 +1,59 @@
+# Default values for audio-pipeline-chart.
+
+replicaCount: 1
+
+# Configuration for the websocket-server container
+websocketServer:
+  image:
+    repository: mendeza/web-socket-server
+    pullPolicy: IfNotPresent
+    tag: "0.0.1"
+  port: 8765
+  env:
+    llmApiBase: "https://llama-32-1b-dep-predictor-andrew-mendez-184335fb.ingress.pcai0108.dc15.hpecolo.net/v1"
+    openaiApiKey: "<UPDATE>" # Truncated for brevity
+    llmModelName: "meta-llama/Llama-3.2-1B-Instruct"
+    asrServerAddress: "parakeet-asr-api-predictor-00002-deployment.andrew-mendez-184335fb.svc.cluster.local:50051"
+    ttsServerAddress: "tts-api-predictor-00002-deployment.andrew-mendez-184335fb.svc.cluster.local:50051"
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "1"
+      memory: "512Mi"
+
+# Configuration for the gradio-ui container
+gradioUi:
+  image:
+    repository: mendeza/web-socket-server-ui
+    pullPolicy: IfNotPresent
+    tag: "0.0.1"
+  port: 8080
+  env:
+    websocketUri: "ws://localhost:8765"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+# Shared environment variables
+ttsSampleRateHz: "44100"
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+
+# --- UPDATED SECTION ---
+# Istio configuration, structured as requested
+ezua:
+  enabled: true
+  virtualService:
+    # The external hostname for the service. Corresponds to VirtualService spec.hosts
+    endpoint: "riva-websocket.${DOMAIN_NAME}"
+    # The Istio gateway to bind to. Corresponds to VirtualService spec.gateways
+    istioGateway: "istio-system/ezaf-gateway"
