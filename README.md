@@ -1,6 +1,6 @@
 <!-- File: README.md (master) -->
 
-# End-to-End Audio Conversational Agent in PCAI
+# End-to-End Audio Conversational Agent in HPE's Private Cloud AI (PCAI) Platform
 
 This repo guides you through:
 
