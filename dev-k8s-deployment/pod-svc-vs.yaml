@@ -39,7 +39,7 @@ spec:
         env:
         - name: LLM_API_BASE
           value: "https://llama-32-1b-dep-predictor-andrew-mendez-184335fb.ingress.pcai0108.dc15.hpecolo.net/v1"
-        - name: OPENAI_API_KEY
+        - name: LLM_API_KEY
           value: "<UPDATE>"
         - name: LLM_MODEL_NAME
           value: "meta-llama/Llama-3.2-1B-Instruct"

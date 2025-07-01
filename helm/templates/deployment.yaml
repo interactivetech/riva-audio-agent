@@ -1,3 +1,5 @@
+# FILE: helm/templates/deployment.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,18 +28,10 @@ spec:
           containerPort: {{ .Values.websocketServer.port }}
           protocol: TCP
         env:
-        - name: LLM_API_BASE
-          value: {{ .Values.websocketServer.env.llmApiBase | quote }}
-        - name: OPENAI_API_KEY
-          value: {{ .Values.websocketServer.env.openaiApiKey | quote }}
-        - name: LLM_MODEL_NAME
-          value: {{ .Values.websocketServer.env.llmModelName | quote }}
-        - name: ASR_SERVER_ADDRESS
-          value: {{ .Values.websocketServer.env.asrServerAddress | quote }}
-        - name: TTS_SERVER_ADDRESS
-          value: {{ .Values.websocketServer.env.ttsServerAddress | quote }}
-        - name: TTS_SAMPLE_RATE_HZ
-          value: {{ .Values.ttsSampleRateHz | quote }}
+{{- range $key, $val := .Values.websocketServer.env }}
+        - name: {{ $key }}
+          value: {{ $val | quote }}
+{{- end }}
         resources:
           {{- toYaml .Values.websocketServer.resources | nindent 10 }}
 
@@ -49,9 +43,9 @@ spec:
           containerPort: {{ .Values.gradioUi.port }}
           protocol: TCP
         env:
-        - name: WEBSOCKET_URI
-          value: {{ .Values.gradioUi.env.websocketUri | quote }}
-        - name: TTS_SAMPLE_RATE_HZ
-          value: {{ .Values.ttsSampleRateHz | quote }}
+{{- range $key, $val := .Values.gradioUi.env }}
+        - name: {{ $key }}
+          value: {{ $val | quote }}
+{{- end }}
         resources:
           {{- toYaml .Values.gradioUi.resources | nindent 10 }}
