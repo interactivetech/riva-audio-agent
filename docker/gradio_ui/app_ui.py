@@ -40,7 +40,7 @@ SUPPORTED_LANGUAGES = list(_RAW_VOICE_DATA.keys())[0].split(',')
 VOICES_BY_LANG = {lang: [v for v in _RAW_VOICE_DATA[list(_RAW_VOICE_DATA.keys())[0]]['voices'] if f".{lang}." in v] for lang in SUPPORTED_LANGUAGES}
 
 
-# # --- Configuration (Loaded from environment variables set by Helm) ---
+# --- Configuration (Loaded from environment variables set by Helm) ---
 WEBSOCKET_URI = os.getenv("WEBSOCKET_URI", "ws://localhost:8765")
 DEFAULT_ASR_URL = os.getenv("ASR_SERVER_ADDRESS", "your-asr-server.svc.cluster.local:50051")
 DEFAULT_TTS_URL = os.getenv("TTS_SERVER_ADDRESS", "your-tts-server.svc.cluster.local:50051")
@@ -54,8 +54,7 @@ TTS_SAMPLE_RATE_HZ = int(DEFAULT_TTS_RATE_HZ)
 TTS_CHANNELS = 1
 TTS_SAMPLE_WIDTH_BYTES = 2
 
-# --- Robust Initialization for Dropdowns (FIX #2) ---
-# Safely determine the initial choices and value for the voice dropdown
+# --- Robust Initialization for Dropdowns ---
 initial_voice_choices = VOICES_BY_LANG.get(DEFAULT_TTS_LANG, [])
 if DEFAULT_TTS_VOICE in initial_voice_choices:
     initial_voice_value = DEFAULT_TTS_VOICE
@@ -165,9 +164,11 @@ async def process_audio_and_return_complete_file(
 def update_voice_options(lang_code):
     """Callback to update the voice dropdown when the language changes."""
     voices = VOICES_BY_LANG.get(lang_code, [])
-    # --- FIX #1: Use the modern Gradio API ---
-    # Instead of gr.Dropdown.update(), we return a new gr.Dropdown object.
-    return gr.Dropdown(choices=voices, value=voices[0] if voices else None, label="Voice")
+    # --- THIS IS THE FIX ---
+    # Use gr.update() to change the properties of an existing component.
+    # This is the correct, modern Gradio API for dynamic updates from callbacks.
+    return gr.update(choices=voices, value=voices[0] if voices else None)
+
 
 # --- Gradio UI Layout ---
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
