@@ -7,10 +7,10 @@ DOCKER_USERNAME="mendeza"
 
 # --- Image Definitions ---
 WEBSOCKET_SERVER_IMAGE_NAME="web-socket-server"
-WEBSOCKET_SERVER_TAG="0.0.2"
+WEBSOCKET_SERVER_TAG="0.0.3"
 
 GRADIO_UI_IMAGE_NAME="web-socket-server-ui"
-GRADIO_UI_TAG="0.0.2"
+GRADIO_UI_TAG="0.0.3"
 
 # --- Prerequisites Check ---
 if ! docker buildx version > /dev/null 2>&1; then
