@@ -7,6 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "audio-pipeline-chart.labels" . | nindent 4 }}
+    {{- include "hpe-ezua.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -16,8 +17,10 @@ spec:
     metadata:
       labels:
         {{- include "audio-pipeline-chart.selectorLabels" . | nindent 8 }}
+        {{- include "hpe-ezua.labels" . | nindent 8 }}
       annotations:
         sidecar.istio.io/inject: "false"
+    spec:
     spec:
       containers:
       - name: websocket-server

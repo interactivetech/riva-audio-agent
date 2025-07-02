@@ -25,7 +25,7 @@ def get_bool_env(var_name: str, default: bool = False) -> bool:
     return os.getenv(var_name, str(default)).lower() in ('true', '1', 't', 'yes', 'y')
 
 LLM_API_BASE = os.getenv("LLM_API_BASE")
-LLM_API_KEY = os.getenv("OPENAI_API_KEY")
+LLM_API_KEY = os.getenv("LLM_API_KEY")
 LLM_PROMPT_TEMPLATE = os.getenv("LLM_PROMPT_TEMPLATE", 'Answer the question: "{transcript}"\n\nAnswer concisely.')
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "meta-llama/Llama-3.2-1B-Instruct")
 

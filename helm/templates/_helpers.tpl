@@ -56,3 +56,14 @@ HPE EZUA labels required for resource and health monitoring.
 hpe-ezua/app: {{ .Release.Name }}
 hpe-ezua/type: vendor-service
 {{- end }}
+
+{{/*
+Create the name of the service account to use.
+*/}}
+{{- define "audio-pipeline-chart.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "audio-pipeline-chart.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}

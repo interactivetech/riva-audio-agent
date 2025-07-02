@@ -8,7 +8,7 @@ websocketServer:
   image:
     repository: mendeza/web-socket-server
     pullPolicy: IfNotPresent
-    tag: "0.0.1"
+    tag: "0.0.2"
   port: 8765
   # Environment variables for the websocket server.
   # These names MUST match the variables expected by websocket_server/app.py
@@ -38,7 +38,7 @@ gradioUi:
   image:
     repository: mendeza/web-socket-server-ui
     pullPolicy: IfNotPresent
-    tag: "0.0.1"
+    tag: "0.0.2"
   port: 8080
   # Environment variables for the Gradio UI.
   # These names MUST match the variables expected by gradio_ui/app_ui.py
