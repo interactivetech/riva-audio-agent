@@ -36,8 +36,9 @@ _RAW_VOICE_DATA = {
         ]
     }
 }
+# Create flat lists of all available languages and voices
 SUPPORTED_LANGUAGES = list(_RAW_VOICE_DATA.keys())[0].split(',')
-VOICES_BY_LANG = {lang: [v for v in _RAW_VOICE_DATA[list(_RAW_VOICE_DATA.keys())[0]]['voices'] if f".{lang}." in v] for lang in SUPPORTED_LANGUAGES}
+ALL_SUPPORTED_VOICES = _RAW_VOICE_DATA[list(_RAW_VOICE_DATA.keys())[0]]['voices']
 
 
 # --- Configuration (Loaded from environment variables set by Helm) ---
@@ -53,13 +54,6 @@ DEFAULT_TTS_RATE_HZ = os.getenv("TTS_SAMPLE_RATE_HZ", "44100")
 TTS_SAMPLE_RATE_HZ = int(DEFAULT_TTS_RATE_HZ)
 TTS_CHANNELS = 1
 TTS_SAMPLE_WIDTH_BYTES = 2
-
-# --- Robust Initialization for Dropdowns ---
-initial_voice_choices = VOICES_BY_LANG.get(DEFAULT_TTS_LANG, [])
-if DEFAULT_TTS_VOICE in initial_voice_choices:
-    initial_voice_value = DEFAULT_TTS_VOICE
-else:
-    initial_voice_value = initial_voice_choices[0] if initial_voice_choices else None
 
 
 # --- WebSocket and Audio Helper Functions (Unchanged) ---
@@ -160,16 +154,6 @@ async def process_audio_and_return_complete_file(
         producer_task.cancel()
 
 
-# --- Gradio UI Logic ---
-def update_voice_options(lang_code):
-    """Callback to update the voice dropdown when the language changes."""
-    voices = VOICES_BY_LANG.get(lang_code, [])
-    # --- THIS IS THE FIX ---
-    # Use gr.update() to change the properties of an existing component.
-    # This is the correct, modern Gradio API for dynamic updates from callbacks.
-    return gr.update(choices=voices, value=voices[0] if voices else None)
-
-
 # --- Gradio UI Layout ---
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
     gr.Markdown(
@@ -183,10 +167,10 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             input_audio = gr.Audio(sources=["microphone", "upload"], type="filepath", label="Your Voice Input")
             
             with gr.Accordion("Advanced Settings", open=False):
-                gr.Markdown("Override the default server settings for this request.")
-                lang_dropdown = gr.Dropdown(label="Language", choices=SUPPORTED_LANGUAGES, value=DEFAULT_TTS_LANG)
-                # Use the safely calculated initial values
-                voice_dropdown = gr.Dropdown(label="Voice", choices=initial_voice_choices, value=initial_voice_value)
+                gr.Markdown("Override the default server settings for this request. Note: Mismatched Language and Voice settings may cause errors.")
+                # --- SIMPLIFIED DROPDOWNS ---
+                lang_dropdown = gr.Dropdown(label="Language Code", choices=SUPPORTED_LANGUAGES, value=DEFAULT_TTS_LANG)
+                voice_dropdown = gr.Dropdown(label="Voice Name", choices=ALL_SUPPORTED_VOICES, value=DEFAULT_TTS_VOICE)
                 prompt_template_input = gr.Textbox(label="LLM Prompt Template", value=DEFAULT_PROMPT, lines=3)
                 asr_server_input = gr.Textbox(label="ASR Server Address", value=DEFAULT_ASR_URL)
                 tts_server_input = gr.Textbox(label="TTS Server Address", value=DEFAULT_TTS_URL)
@@ -210,7 +194,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             output_audio = gr.Audio(label="Synthesized Voice Output", streaming=False, autoplay=True)
             status_textbox = gr.Textbox(label="Processing Status Log", lines=15, interactive=False, autoscroll=True)
 
-    lang_dropdown.change(fn=update_voice_options, inputs=lang_dropdown, outputs=voice_dropdown)
+    # --- REMOVED: No longer need the .change() event for dependent dropdowns ---
     
     all_inputs = [
         input_audio, prompt_template_input, asr_server_input,
